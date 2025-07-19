@@ -1,0 +1,28 @@
+{
+  "name": "mean-stack-project",
+  "version": "1.0.0",
+  "description": "there is no description",
+  "homepage": "https://github.com/mohamedemara01018/Mean-Stack-Project#readme",
+  "bugs": {
+    "url": "https://github.com/mohamedemara01018/Mean-Stack-Project/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mohamedemara01018/Mean-Stack-Project.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.0",
+    "express": "^5.1.0",
+    "mongoose": "^8.16.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
