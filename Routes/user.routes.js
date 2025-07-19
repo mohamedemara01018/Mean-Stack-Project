@@ -1,12 +1,18 @@
+import express from "express";
+import bcrypt from "bcryptjs";
 
-import express from 'express'
-import { createUser, getAllUser } from '../Controllers/user.controllers.js'
-const router = express.Router()
+import {
+  register,
+  login,
+  getAllUsers,
+  deleteUser,
+} from "../Controllers/user.controllers.js";
 
+const router = express.Router();
 
-router.get('/', getAllUser)
-router.post('/', createUser)
+router.post("/register", register);
+router.post("/login", login);
+router.get("/users", getAllUsers);
+router.delete("/users/:id", deleteUser);
 
-
-
-export default router
+export default router;
