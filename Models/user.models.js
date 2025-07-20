@@ -11,12 +11,12 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "admin"],
       default: "user",
     },
-    refreshToken: String
+    refreshToken: String,
   },
   { timestamps: true }
 );
 
-// 🔐 pre-save hook to hash password before saving
+//  pre-save hook to hash password before saving
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 

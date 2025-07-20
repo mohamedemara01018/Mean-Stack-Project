@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 import userRoutes from "./Routes/user.routes.js";
 import categoryRoutes from "./Routes/category.routes.js";
 import productRoutes from "./Routes/product.routes.js";
-
+import reviewRoutes from "./Routes/review.routes.js";
 dotenv.config();
 
 const app = express();
@@ -15,17 +15,18 @@ mongoose
     console.log("✅ Connected to MongoDB successfully");
   })
   .catch((error) => {
-    console.error(`❌ MongoDB connection error: ${error}`);
+    console.error(` MongoDB connection error: ${error}`);
     process.exit(1);
   });
 
 app.use(express.json());
 
-app.use("/users", userRoutes);
+app.use("/api/users", userRoutes);
 app.use("/categories", categoryRoutes);
 app.use("/products", productRoutes);
+app.use("/reviews", reviewRoutes);
 
-const PORT = process.env.PORT || 3334;
+const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server is running on http://localhost:${PORT}`);
+  console.log(` Server is running on http://localhost:${PORT}`);
 });

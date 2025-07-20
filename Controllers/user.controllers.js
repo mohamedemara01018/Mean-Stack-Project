@@ -1,152 +1,59 @@
+import User from "../models/user.models.js";
 import bcrypt from "bcryptjs";
-import User from "../Models/user.models.js";
-import generateTokens from "../utils/generateTokens.js";
-import { promisify } from 'util';
-import jwt from 'jsonwebtoken'
+import jwt from "jsonwebtoken";
 
-/**
- * @route   GET /api/users
- * @desc    Get all users (admin only)
- * @access  Private/Admin
- */
-
-
-export const getAllUsers = async (req, res) => {
+export const registerUser = async (req, res) => {
   try {
-    const users = await User.find();
-    res.json(users);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
+    const { username, email, password } = req.body;
 
-
-
-
-
-/**
- * @route   POST /api/auth/register
- * @desc    Register new user
- * @access  Public
- */
-export const register = async (req, res) => {
-  const newUser = req.body;
-  const email = newUser.email
-
-  try {
-    const exist = await User.findOne({ email });
-    if (exist) return res.status(400).json({ message: "Email already exists" });
-
-    const user = await User.create(newUser);
-
-    res.status(201).json({ message: "User registered", user: user });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-
-export const updateUser = async (req, res) => {
-  const { id } = req.params
-  const updatedUser = req.body
-  try {
-    const user = await User.updateOne({ _id: id }, updatedUser);
-    res.status(201).json({ message: 'user is updated', updatedUser })
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-}
-
-
-
-
-/**
- * @route   DELETE /api/users/:id
- * @desc    Delete user by ID (admin only)
- * @access  Private/Admin
- */
-export const deleteUser = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const deletedUser = await User.findByIdAndDelete(id);
-    if (!deletedUser) res.status(404).json({ message: "User not found" });
-    res.status(204).json({ message: "User deleted", userId: id });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-
-/**
- * @route   POST /api/auth/login
- * @desc    Login user and return tokens
- * @access  Public
- */
-
-export const login = async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    if (!email || !password) {
-      return res.status(400).json({ message: 'You must provide email and password' });
+    // تحقق إذا كان اليوزر أو الإيميل موجودين بالفعل
+    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    if (existingUser) {
+      return res.status(400).json({ message: "User or Email already exists" });
     }
 
+    // إنشاء مستخدم جديد - كلمة السر هتتشفر تلقائياً في pre save
+    const newUser = new User({ username, email, password });
+    await newUser.save();
+
+    res.status(201).json({ message: "Registration successful" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+export const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // البحث عن اليوزر بالإيميل
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const isValid = await bcrypt.compare(password, user.password);
-    if (!isValid) {
-      return res.status(401).json({ message: 'Invalid password' });
+    // مقارنة كلمة السر
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const { accessToken, refreshToken } = generateTokens({
-      id: user._id,
-      email: user.email
-    });
-
-    await User.findByIdAndUpdate(user._id, { refreshToken });
-
-    return res.status(201).json({
-      message: 'Login successful',
-      accessToken,
-      refreshToken
-    });
-
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Failed to login' });
-  }
-};
-
-
-
-export const refreshToken = async (req, res) => {
-  const { refreshToken } = req.body;
-
-  if (!refreshToken) {
-    return res.status(403).json({ message: 'The refresh token is required' });
-  }
-
-  try {
-    const decoded = await promisify(jwt.verify)(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-    const user = await User.findOne({ email: decoded.email });
-
-    if (!user || user.refreshToken !== refreshToken) {
-      return res.status(403).json({ message: 'Invalid refresh token' });
-    }
-
+    // إنشاء Access Token و Refresh Token
     const accessToken = jwt.sign(
-      { id: user._id, email: user.email },
+      { userId: user._id, role: user.role },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: '6h' }
+      { expiresIn: "10h" }
     );
 
-    return res.status(201).json({ message: 'Token created successfully', accessToken });
+    const refreshToken = jwt.sign(
+      { userId: user._id, role: user.role },
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: "7d" }
+    );
 
+    // ممكن تبعتي الريفرش توكن كـ HttpOnly cookie عشان أمان أكتر (اختياري)
+    res.json({ accessToken, refreshToken });
   } catch (error) {
-    console.error(error);
-    return res.status(403).json({ message: 'Invalid or expired refresh token' });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };

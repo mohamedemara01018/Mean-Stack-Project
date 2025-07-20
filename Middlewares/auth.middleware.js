@@ -1,40 +1,34 @@
 import jwt from "jsonwebtoken";
 
-/**
- * Middleware to authenticate user using JWT access token.
- * Checks if token exists and is valid, and attaches user data to request.
- */
 export const authenticate = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({
-      message: "No token provided or invalid format (use Bearer <token>)",
-    });
+  if (!authHeader) {
+    return res.status(401).json({ message: "No token provided" });
   }
 
-  const token = authHeader.split(" ")[1];
+  const token = authHeader.split(" ")[1] || authHeader;
 
   try {
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    req.user = decoded;
+    console.log("Decoded Token:", decoded); // ✅
+    req.user = decoded; // ← ← ← هنا لازم يكون موجود
     next();
   } catch (err) {
-    return res.status(403).json({ message: "Invalid or expired token" });
+    return res.status(403).json({ message: "Invalid token" });
   }
 };
 
-/**
- * Middleware to authorize user based on role(s).
- * @param {...string} roles - Allowed roles (e.g. "admin", "moderator")
- */
-export const authorize = (...roles) => {
+export const authorize = (...allowedRoles) => {
   return (req, res, next) => {
-    if (!req.user || !roles.includes(req.user.role)) {
-      return res
-        .status(403)
-        .json({ message: "Access denied: insufficient permissions" });
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
     }
+
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({ message: "Forbidden: Access denied" });
+    }
+
     next();
   };
 };
