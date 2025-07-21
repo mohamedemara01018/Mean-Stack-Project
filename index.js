@@ -5,6 +5,7 @@ import userRoutes from "./Routes/user.routes.js";
 import categoryRoutes from "./Routes/category.routes.js";
 import productRoutes from "./Routes/product.routes.js";
 import reviewRoutes from "./Routes/review.routes.js";
+import product_category from "./Routes/product_category.routes.js";
 dotenv.config();
 
 const app = express();
@@ -25,6 +26,7 @@ app.use("/api/users", userRoutes);
 app.use("/categories", categoryRoutes);
 app.use("/products", productRoutes);
 app.use("/reviews", reviewRoutes);
+app.use("/product_category", product_category);
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
