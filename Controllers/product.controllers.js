@@ -40,10 +40,11 @@ export const createProduct = async (req, res) => {
 
 // Update product
 export const updateProduct = async (req, res) => {
+  const newProduct = req.body
   try {
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
-      { ...req.body, updated_at: new Date() },
+      { newProduct, updated_at: new Date() },
       { new: true }
     );
     if (!updatedProduct)
