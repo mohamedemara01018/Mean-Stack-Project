@@ -4,7 +4,6 @@ import {
   addReview,
   getProductReviews,
   deleteReview,
-  getAllReviews,
 } from "../controllers/review.controller.js";
 import { authenticate } from "../Middlewares/auth.middleware.js";
 
