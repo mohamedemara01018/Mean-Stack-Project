@@ -1,4 +1,3 @@
-// routes/orders.routes.js
 import express from "express";
 import {
   addOrder,
@@ -7,19 +6,20 @@ import {
   deleteOrder,
 } from "../Controllers/orders.controller.js";
 import { authenticate } from "../Middlewares/auth.middleware.js";
+import { getAllProductCategory } from "../Controllers/product_category.controller.js";
 
 const router = express.Router();
 
-// POST - Add an order
-router.post("/", authenticate, addOrder);
+// POST - Add an order (open)
+router.post("/", addOrder); // ← بدون authenticate
 
-// GET - Get all orders
+// GET - Get all orders (optional)
 router.get("/", getAllOrders);
 
-// GET - Get orders for a user
-router.get("/user", authenticate, getUserOrders);
+// GET - Get current user's orders (هتحتاج توكن لو شغال)
+router.get("/user", getUserOrders); // ← كمان مؤقتًا بدون authenticate
 
-// DELETE - Delete an order
-router.delete("/:orderId", authenticate, deleteOrder);
+// DELETE - Delete a specific order (هتحتاج توكن)
+router.delete("/:orderId", deleteOrder); // ← مؤقتًا بدون authenticate
 
 export default router;

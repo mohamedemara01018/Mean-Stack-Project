@@ -1,22 +1,28 @@
-import { Order } from "../Models/orders.model.js";
+import Order from '../Models/orders.model.js'
 
-// Add a new order
-export const addOrder = async (req, res) => {
+const addOrder = async (req, res) => {
   try {
-    const { status } = req.body;
-    const user_id = req.user.userId;
+    const { status, user_id } = req.body;
 
-    const order = new Order({ status, user_id, total_amount: 0 });
-    await order.save();
+    if (!status || !user_id) {
+      return res.status(400).json({ message: 'Status and user_id are required' });
+    }
+
+    const order = await Order.create({
+      status,
+      user_id,
+      total_amount: 0
+    });
 
     res.status(201).json(order);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Error creating order:', err);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
 // Get all orders
-export const getAllOrders = async (req, res) => {
+const getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find().populate("user_id", "name email");
     res.status(200).json(orders);
@@ -26,7 +32,7 @@ export const getAllOrders = async (req, res) => {
 };
 
 // Get orders for a user
-export const getUserOrders = async (req, res) => {
+const getUserOrders = async (req, res) => {
   try {
     const user_id = req.user.userId;
     const orders = await Order.find({ user_id }).populate(
@@ -40,7 +46,7 @@ export const getUserOrders = async (req, res) => {
 };
 
 // Delete an order
-export const deleteOrder = async (req, res) => {
+const deleteOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
     const userId = req.user.userId;
@@ -62,4 +68,11 @@ export const deleteOrder = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
+};
+
+export {
+  addOrder,
+  getAllOrders,
+  getUserOrders,
+  deleteOrder
 };
