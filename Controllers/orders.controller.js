@@ -2,8 +2,9 @@ import Order from '../Models/orders.model.js'
 
 const addOrder = async (req, res) => {
   try {
-    const { status, user_id } = req.body;
-
+    const { status } = req.body;
+    const  user_id  = req.user.userId;
+    console.log(user_id)
     if (!status || !user_id) {
       return res.status(400).json({ message: 'Status and user_id are required' });
     }
@@ -14,7 +15,7 @@ const addOrder = async (req, res) => {
       total_amount: 0
     });
 
-    res.status(201).json(order);
+    res.status(201).json({ message: 'success', order });
   } catch (err) {
     console.error('Error creating order:', err);
     res.status(500).json({ message: 'Internal server error' });
@@ -49,18 +50,11 @@ const getUserOrders = async (req, res) => {
 const deleteOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
-    const userId = req.user.userId;
 
     const order = await Order.findById(orderId);
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
-    }
-
-    if (order.user_id.toString() !== userId) {
-      return res
-        .status(403)
-        .json({ message: "Not authorized to delete this order" });
     }
 
     await order.deleteOne();

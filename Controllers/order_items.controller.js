@@ -1,5 +1,38 @@
 import { OrderItem } from "../Models/order_items.model.js";
 
+
+export const getOrderItems = async (req, res) => {
+  try {
+    const orderItems = await OrderItem
+      .find()
+      .populate('product_id', 'name description price -_id')
+      .populate({
+        path: 'order_id',
+        select: '-_id',
+        populate: {
+          path:'user_id',
+          select:'-_id username email role'
+        }
+      })
+    res.status(200).json({ message: 'success', orderItems })
+  } catch (error) {
+    res.status(500).json('internal server error')
+  }
+}
+
+
+// Get all items for an order
+export const getOrderItemsById = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const items = await OrderItem.find({ _id: orderId })
+      .populate("product_id", "title price");
+    res.json(items);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 // Add a new order item
 export const addOrderItem = async (req, res) => {
   try {
@@ -21,17 +54,6 @@ export const addOrderItem = async (req, res) => {
   }
 };
 
-// Get all items for an order
-export const getOrderItems = async (req, res) => {
-  try {
-    const { orderId } = req.params;
-    const items = await OrderItem.find({ order_id: orderId })
-      .populate("product_id", "title price");
-    res.json(items);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
 
 // Delete an order item
 export const deleteOrderItem = async (req, res) => {

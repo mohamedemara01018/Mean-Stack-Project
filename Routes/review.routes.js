@@ -4,6 +4,7 @@ import {
   addReview,
   getProductReviews,
   deleteReview,
+  getAllReviews
 } from "../controllers/review.controller.js";
 import { authenticate } from "../Middlewares/auth.middleware.js";
 
@@ -11,7 +12,7 @@ const router = express.Router();
 
 // POST - Add a review
 
-// router.get("/", getAllReviews);
+router.get("/", getAllReviews);
 
 
 router.post("/", authenticate, addReview);

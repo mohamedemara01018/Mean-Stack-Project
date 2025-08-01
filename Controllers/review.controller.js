@@ -2,17 +2,17 @@ import Review from "../Models/review.model.js";
 
 // don't delete this function 
 
-// export const getAllReviews = async (req, res) => {
-//   try {
-//     const reviews = await Review.find()
-//       .populate("user", "name email")        // show user info
-//       .populate("product", "title price");   // show product info
+export const getAllReviews = async (req, res) => {
+  try {
+    const reviews = await Review.find()
+      .populate("user", "name email")        // show user info
+      .populate("product", "title price");   // show product info
 
-//     res.status(200).json(reviews); // ✅ send the reviews as response
-//   } catch (err) {
-//     res.status(500).json({ message: err.message });
-//   }
-// };
+    res.status(200).json(reviews); // ✅ send the reviews as response
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
 
 export const addReview = async (req, res) => {

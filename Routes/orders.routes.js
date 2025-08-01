@@ -11,15 +11,15 @@ import { getAllProductCategory } from "../Controllers/product_category.controlle
 const router = express.Router();
 
 // POST - Add an order (open)
-router.post("/", addOrder); // ← بدون authenticate
+router.post("/", authenticate,addOrder); // ← بدون authenticate
 
 // GET - Get all orders (optional)
-router.get("/", getAllOrders);
+router.get("/",authenticate, getAllOrders);
 
 // GET - Get current user's orders (هتحتاج توكن لو شغال)
-router.get("/user", getUserOrders); // ← كمان مؤقتًا بدون authenticate
+router.get("/user", authenticate,getUserOrders); // ← كمان مؤقتًا بدون authenticate
 
 // DELETE - Delete a specific order (هتحتاج توكن)
-router.delete("/:orderId", deleteOrder); // ← مؤقتًا بدون authenticate
+router.delete("/:orderId",authenticate, deleteOrder); // ← مؤقتًا بدون authenticate
 
 export default router;
